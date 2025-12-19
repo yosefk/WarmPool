@@ -11,8 +11,8 @@ More context can be found [here](https://yosefk.com/blog/enabling-c-threads-in-a
 
 # Usage
 
-* `WarmPool pool(num_threads);` creates a pool; since the thread submitting the work to the pool also runs some work, you might want to pass 7 to get "8 threads working in parallel"
-* `pool.parallel_for(start, finish, index_func)` is the only way to submit work; the limitations appear below
+* `WarmPool pool(num_threads)` creates a pool; since the thread submitting the work to the pool also runs some work, you might want to pass 7 to get "8 threads working in parallel"
+* `pool.parallel_for(start, finish, index_func)` is how you submit work; the limitations appear below
 * `pool.warm(true/false)` puts the pool into a warm/cold state; cold=waiting on a futex, warm=busy-waiting (which means faster wake-ups but more CPU overhead, so you would go back into the cool state after a burst of work.) There's a 2nd optional parameter setting the number of busy-waiting iterations after which the pool "cools down" on its own, in case the warm(false) call is never made 
 * "Statistics/status functions":
   * `pool.main_iter_share()` returns the share of iterations executed by the main thread (more accurately, the threads which issued non-nested calls to parallel_for which weren't serialized due to having been issued concurrently from several threads.) This is interesting in that a main thread doing "too much" of the work indicates some issue with workers' availability, response time or throughput relatively to the main thread.
@@ -23,5 +23,5 @@ More context can be found [here](https://yosefk.com/blog/enabling-c-threads-in-a
 
 * Only a `parallel_for` API is provided to submit work
 * Nested calls to `parallel_for` are serialized
-* It's possible to submit work for more than one thread, but only the first of concurrent submissions will actually use the workers - the others will be serialized
+* It's possible to submit work from more than one thread, but only the first of concurrent submissions will actually use the workers - the others will be serialized
 * The scheduling is "naively dynamic" - there's a shared "next work item" counter that all workers increment. For a very large number of workers and small work items, such "work sharing" might scale worse than work stealing or work requesting. If you want a grain size above 1, you need to do it manually on top of the very simple API
