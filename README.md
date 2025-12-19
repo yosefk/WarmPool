@@ -3,6 +3,7 @@
 WarmPool is a 200 LOC C++ thread pool that you can use with `pool.parallel_for(start, finish, index_func)`.
 It works on Wasm/Emscripten (as well as actually standard-conforming C++ threading implementations...)
 It can be "warmed up" to cut the latency of waiting on a futex (the workers will spin instead.)
+Virtually no dynamic allocation, no thread-local storage, and no synchronization APIs not mapping straightforwardly to Wasm builtins.
 It's "header-only," that sadly appealing virtue that relieves you of build system integration worries.
 
 It's very limited, but if your use case fits the limited API, it's fast, low footprint, and simple to use/integrate/debug.
