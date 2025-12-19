@@ -19,6 +19,11 @@ More context can be found [here](https://yosefk.com/blog/enabling-c-threads-in-a
   * `pool.main_iter_share()` returns the share of iterations executed by the main thread (more accurately, the threads which issued non-nested calls to parallel_for which weren't serialized due to having been issued concurrently from several threads.) This is interesting in that a main thread doing "too much" of the work indicates some issue with workers' availability, response time or throughput relatively to the main thread.
   * `pool.reset_stats()` zeroes the counters from which `main_iter_share` is calculated
   * `pool.num_ready_threads()` tells how many threads are "up and waiting for work"; `parallel_for` calls are serialized until all the threads in the pool are ready (this can be helpful on Wasm where threads can take _a lot_ of time to start, and you'll get a slowdown by trying to parallelize your initialization and waiting for them to start, compared to just serializing work until they do. This also relieves the pool user of the need to yield to the event loop during init time so that threads can start, though doing so might speed up some parallelizable init time work.)
+ 
+# Interaction with instrumentation
+
+* TSan should "just work"
+* Run valgrind with `--fair-sched=yes` if you use `pool.warm(true)` (otherwise Valgrind gets stuck, as its default scheduler runs threads until they block on a syscall, leading to an endless loop if a thread busy-waits.) Or you could keep pools "cold" under Valgrind
 
 # Limitations
 
